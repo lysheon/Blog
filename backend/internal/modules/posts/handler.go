@@ -30,6 +30,10 @@ func (m *Module) Register(r *gin.Engine, authMW gin.HandlerFunc, adminMW gin.Han
 	v1.PUT("/posts/:slug", authMW, m.update)
 	v1.DELETE("/posts/:slug", authMW, m.delete)
 
+	// The author workspace lives under /me so a post whose slug happens to be
+	// "mine" can never shadow it.
+	v1.GET("/me/posts", authMW, m.listMine)
+
 	v1.GET("/categories", m.listCategories)
 	v1.POST("/categories", adminMW, m.createCategory)
 	v1.PUT("/categories/:slug", adminMW, m.updateCategory)
@@ -47,6 +51,17 @@ func (m *Module) list(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	size, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 	result, err := m.svc.List(c, page, size)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	httpserver.OK(c, result)
+}
+
+func (m *Module) listMine(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	size, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	result, err := m.svc.ListMine(c, c.Query("status"), page, size)
 	if err != nil {
 		c.Error(err)
 		return

@@ -5,6 +5,7 @@ import { AppLayout } from './layout'
 import { AskPage } from './pages/AskPage'
 import { AuthPage } from './pages/AuthPage'
 import { EditorPage } from './pages/EditorPage'
+import { MyPostsPage } from './pages/MyPostsPage'
 import { HomePage } from './pages/HomePage'
 import { PostPage } from './pages/PostPage'
 import { TaxonomyPage } from './pages/TaxonomyPage'
@@ -20,7 +21,7 @@ export default function App() {
       <Route index element={<HomePage />} />
       <Route path="ask" element={<AskPage />} />
       <Route path="posts/:slug" element={<PostPage />} />
-      <Route element={<ProtectedRoute />}><Route path="write" element={<EditorPage />} /></Route>
+      <Route element={<ProtectedRoute />}><Route path="write" element={<EditorPage />} /><Route path="me/posts" element={<MyPostsPage />} /></Route>
       <Route element={<ProtectedRoute admin />}><Route path="admin/taxonomy" element={<TaxonomyPage />} /></Route>
       <Route path="*" element={<NotFoundPage />} />
     </Route>

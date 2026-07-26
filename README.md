@@ -143,6 +143,7 @@ GET    /posts/:slug            📖 public or owner/admin
 POST   /posts                  ✏️  authenticated
 PUT    /posts/:slug             🖊️  author or admin
 DELETE /posts/:slug             🗑️  author or admin
+GET    /me/posts               🗂️  own posts incl. drafts (workspace)
 
 🏷️  Taxonomy ─────────────────────────────────────
 GET    /categories             📂 public

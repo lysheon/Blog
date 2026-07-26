@@ -272,6 +272,41 @@ func (s *Service) List(ctx *gin.Context, page, pageSize int) (*domain.PagedPosts
 	}}, nil
 }
 
+// ListMine returns the signed-in author's workspace: every own post across
+// all statuses and visibilities. Ownership is the only filter — surfacing
+// drafts and private posts is the reason this listing exists.
+func (s *Service) ListMine(ctx *gin.Context, rawStatus string, page, pageSize int) (*domain.PagedPosts, error) {
+	user := authmod.GetCurrentUser(ctx)
+	if user == nil {
+		return nil, apperr.Unauthorized("")
+	}
+	status := ""
+	if strings.TrimSpace(rawStatus) != "" {
+		normalized, ok := validStatus(rawStatus)
+		if !ok {
+			return nil, apperr.Validation("status must be draft, published, or archived", nil)
+		}
+		status = normalized
+	}
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 || pageSize > 50 {
+		pageSize = 20
+	}
+	maxPage := int(^uint(0)>>1)/pageSize + 1
+	if page > maxPage {
+		return nil, apperr.Validation("page is too large", nil)
+	}
+	posts, total, err := s.repo.ListPostsByAuthor(ctx.Request.Context(), user.ID, status, page, pageSize)
+	if err != nil {
+		return nil, apperr.Internal(err, "")
+	}
+	return &domain.PagedPosts{Posts: posts, Pagination: domain.Pagination{
+		Page: page, PageSize: pageSize, Total: int(total), TotalPages: int(math.Ceil(float64(total) / float64(pageSize))),
+	}}, nil
+}
+
 func (s *Service) Delete(ctx *gin.Context, slug string) error {
 	post, err := s.repo.FindPostBySlug(ctx.Request.Context(), slug)
 	if err != nil {

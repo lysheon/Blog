@@ -20,6 +20,7 @@ export function AppLayout() {
         <nav className="main-nav" aria-label="Main navigation">
           <NavLink to="/" end>Stories</NavLink>
           <NavLink to="/ask">Ask AI</NavLink>
+          {user && <NavLink to="/me/posts">My stories</NavLink>}
           {user && <NavLink to="/write">Write</NavLink>}
           {user?.role === 'admin' && <NavLink to="/admin/taxonomy">Taxonomy</NavLink>}
         </nav>

@@ -191,6 +191,33 @@ func (r *Repository) ListPosts(ctx context.Context, page, pageSize int, status, 
 	return posts, total, err
 }
 
+// ListPostsByAuthor returns the author's own posts — drafts, private and
+// archived included — with the most recently edited first.
+func (r *Repository) ListPostsByAuthor(ctx context.Context, authorID uint64, status string, page, pageSize int) ([]domain.Post, int64, error) {
+	var posts []domain.Post
+	var total int64
+
+	query := r.db.WithContext(ctx).Model(&domain.Post{}).
+		Where("author_id = ? AND deleted_at IS NULL", authorID)
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	err := query.
+		Preload("Author").
+		Preload("Categories").
+		Preload("Tags").
+		Order("updated_at DESC, id DESC").
+		Offset((page - 1) * pageSize).
+		Limit(pageSize).
+		Find(&posts).Error
+	return posts, total, err
+}
+
 // SoftDeletePost atomically soft-deletes a post and enqueues vector removal.
 func (r *Repository) SoftDeletePost(ctx context.Context, post *domain.Post) error {
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {

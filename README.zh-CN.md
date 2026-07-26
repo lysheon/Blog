@@ -143,6 +143,7 @@ GET    /posts/:slug            📖 公开或作者/管理员
 POST   /posts                  ✏️  登录用户
 PUT    /posts/:slug             🖊️  作者或管理员
 DELETE /posts/:slug             🗑️  作者或管理员
+GET    /me/posts               🗂️  本人全部文章（含草稿）
 
 🏷️  分类与标签 ───────────────────────────────────
 GET    /categories             📂 公开
