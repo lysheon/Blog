@@ -260,6 +260,7 @@ RAG 额外需要：`AI_CHAT_BASE_URL`、`AI_CHAT_API_KEY`、`AI_CHAT_MODEL`。
 - Nginx 与应用请求体上限应一起调整；代理默认上限为 2 MiB。
 - MySQL 是领域数据和任务的共同真相；Redis 不承载持久任务。
 - Embedding/Chat API key 只存在于环境变量中，不进入日志、任务载荷、数据库或前端。
+- SQL 日志只保留绑定占位符，因此邮箱、密码哈希、Token 和文章正文在任何日志级别都不会写入应用日志。
 - RAG 只检索 published + public 的文章；每次回答前用 MySQL 重新校验每个候选。
 - Chat system prompt 将文章内容标记为不可信数据——而非指令。
 

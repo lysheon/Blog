@@ -46,7 +46,7 @@ Stage 4 是当前路线图的最终阶段，在 Stage 3 当前公开文章索引
 3. 按 `RAG_SCORE_THRESHOLD` 过滤。
 4. 按文章限制 `RAG_MAX_CHUNKS_PER_POST`，总计最多 `RAG_FINAL_CHUNKS`。
 5. 使用 MySQL 批量读取文章，要求当前仍为 published/public、未删除，并且 `content_version` 与候选完全相等。
-6. 按分数排序构建有界上下文和来源；同一文章来源去重。
+6. 按分数排序构建有界上下文和来源；同一文章来源去重。同一文章的多个 chunk 共用该文章的来源编号，保证回答里的 `[n]` 始终能在 sources 中找到对应项。
 
 Milvus 只负责召回，MySQL 是授权、标题、slug 和当前版本的权威来源。
 
@@ -75,7 +75,7 @@ AI 问答沿用 Redis rate limiter，但成本敏感端点采用 fail-closed：R
 
 错误分类：
 
-- 禁用：503 `ai_not_enabled`
+- 禁用：503 `ai_not_enabled`。该端点在关闭 AI 时仍然注册，避免退化成路由级 404；此时不经过 AI 限流器，Redis 故障也不会掩盖该契约。
 - 输入无效：400 `validation_error`
 - 超限：429 `rate_limited`
 - Embedding/Chat/Milvus 超时或不可用：503 `ai_unavailable`

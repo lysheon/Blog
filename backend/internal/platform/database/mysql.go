@@ -8,6 +8,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"log"
+	"os"
 	"time"
 
 	"gorm.io/driver/mysql"
@@ -17,19 +20,32 @@ import (
 	"github.com/lsy/blog/internal/config"
 )
 
+// newQueryLogger builds the GORM logger. Parameterized queries keep statements
+// readable for debugging while keeping row values — emails, password hashes,
+// tokens, article bodies — out of the application log, which is shipped to
+// operators and log storage.
+func newQueryLogger(env string, writer io.Writer) gormlogger.Interface {
+	logLevel := gormlogger.Warn
+	if env == "dev" {
+		logLevel = gormlogger.Info
+	}
+	return gormlogger.New(log.New(writer, "", log.LstdFlags), gormlogger.Config{
+		SlowThreshold:             200 * time.Millisecond,
+		LogLevel:                  logLevel,
+		IgnoreRecordNotFoundError: true,
+		ParameterizedQueries:      true,
+		Colorful:                  false,
+	})
+}
+
 // New 根据配置创建 GORM DB 连接。
 func New(ctx context.Context, cfg config.MySQLConfig, env string) (*gorm.DB, error) {
 	if cfg.DSN == "" {
 		return nil, errors.New("database: MYSQL_DSN is required")
 	}
 
-	logLevel := gormlogger.Warn
-	if env == "dev" {
-		logLevel = gormlogger.Info
-	}
-
 	gormCfg := &gorm.Config{
-		Logger: gormlogger.Default.LogMode(logLevel),
+		Logger: newQueryLogger(env, os.Stdout),
 		// 使用下方带 context 超时的单次 Ping，避免 GORM 在连接池配置前无界 Ping。
 		DisableAutomaticPing: true,
 		// 关闭事务嵌套回滚点的隐式行为，保持事务语义可预测。

@@ -8,6 +8,7 @@ export function AskPage() {
   const [question, setQuestion] = useState('')
   const [result, setResult] = useState<AIAnswer | null>(null)
   const [error, setError] = useState('')
+  const [unavailable, setUnavailable] = useState(false)
   const [loading, setLoading] = useState(false)
 
   async function submit(event: FormEvent) {
@@ -20,7 +21,13 @@ export function AskPage() {
     try {
       setResult(await api.askAI(value))
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'The article assistant is temporarily unavailable.')
+      // A deployment can run without AI. That is a configuration state, not a
+      // failed request, so it gets its own explanation instead of an error.
+      if (caught instanceof ApiError && caught.code === 'ai_not_enabled') {
+        setUnavailable(true)
+      } else {
+        setError(caught instanceof ApiError ? caught.message : 'The article assistant is temporarily unavailable.')
+      }
     } finally {
       setLoading(false)
     }
@@ -33,13 +40,17 @@ export function AskPage() {
       <p>Answers are grounded in the public articles and include links back to their sources.</p>
       <form className="ask-form" onSubmit={(event) => void submit(event)}>
         <label htmlFor="rag-question">Your question</label>
-        <textarea id="rag-question" value={question} maxLength={2000} rows={5}
+        <textarea id="rag-question" value={question} maxLength={2000} rows={5} disabled={unavailable}
           onChange={(event) => setQuestion(event.target.value)}
           placeholder="What do these articles say about…?" />
-        <div className="ask-actions"><span>{question.length} / 2000</span><button className="button" disabled={loading || !question.trim()}>{loading ? 'Searching…' : 'Ask'}</button></div>
+        <div className="ask-actions"><span>{question.length} / 2000</span><button className="button" disabled={loading || unavailable || !question.trim()}>{loading ? 'Searching…' : 'Ask'}</button></div>
       </form>
     </section>
 
+    {unavailable && <section className="state-card" role="status">
+      <strong>The article assistant is turned off</strong>
+      <p>This deployment runs without AI question answering. Every published story is still fully readable — <Link to="/">browse the journal</Link>.</p>
+    </section>}
     {error && <section className="error-state" role="alert"><strong>Question failed</strong><p>{error}</p></section>}
     {result && <section className="answer-panel" aria-live="polite">
       <div className="eyebrow">Grounded answer</div>
