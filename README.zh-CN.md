@@ -71,7 +71,9 @@ Blog/
 │   ├── compose.yaml              # 基础部署
 │   ├── compose.dev.yaml          # 回环开发端口
 │   ├── compose.integration.yaml  # 临时 MySQL/Redis/Milvus
+│   ├── compose.mock-ai.yaml      # 本地确定性 Mock Embedding/Chat 覆盖
 │   ├── compose.secrets.yaml      # 生产 Secret 文件覆盖
+│   ├── mock-ai/                  # 无第三方依赖的 OpenAI-compatible Mock
 │   └── proxy/nginx.conf
 ├── docs/
 │   ├── architecture/{stage-0,stage-1,stage-2,stage-3,stage-4,stage-5,stage-5-1}.md
@@ -102,13 +104,25 @@ cp .env.example .env
 
 至少替换 `MYSQL_PASSWORD`、`MYSQL_ROOT_PASSWORD`、`REDIS_PASSWORD` 和 `JWT_SECRET`（至少 32 字节）。确保 `MYSQL_DSN` 与 MySQL 初始化值一致——它是 `go-sql-driver/mysql` DSN，不是 `mysql://` URL。
 
-### 3️⃣ 启动
+### 3️⃣ 选择部署栈
+
+| 部署栈 | 命令 | AI 能力 | 适用场景 |
+|---|---|---|---|
+| 🤖 Mock AI（当前推荐） | `make mock-ai-up` | 通过内部 Mock Embedding/Chat 启用索引与 RAG | 无 Provider 账号也能跑通完整 AI 流程 |
+| 📰 基础 | `make up` | 默认关闭 | 只使用博客功能 |
+| 🔑 真实 Provider | 配置 `.env` 的 `AI_*` 后 `make up` | 通过你的 OpenAI-compatible 接口启用索引与 RAG | 接近生产的 AI 部署 |
+
+三种方式都会启动同一套 React SPA、Go API、Worker、MySQL、Redis、Milvus 和 Nginx 服务。
 
 ```bash
-make compose-config   # 静默验证 Compose 配置
-make up               # 构建并启动全栈
-make ps               # 查看服务状态
+make compose-mock-ai-config  # 校验基础 Compose + Mock AI 覆盖
+make mock-ai-up              # 构建并等待完整栈健康
+make mock-ai-ps              # 查看所有服务状态
 ```
+
+一次性 `mock-ai-smoke` 服务会调用真实 `/api/v1/ai/ask`，因此只有 Embedding、Milvus 和 Chat 链路可用后 `make mock-ai-up` 才会成功。基础凭据仍从 `.env` 读取；Mock AI 不需要真实 Provider key。
+
+只需要博客功能时，改用 `make compose-config`、`make up` 和 `make ps`。
 
 ### 4️⃣ 验证
 
@@ -120,6 +134,18 @@ curl -i http://127.0.0.1:8080/api/v1/posts      # 公开文章
 ```
 
 🔄 **启动顺序：** MySQL/Redis 健康 → 一次性 migration → API + Worker 启动 → Proxy 上线。
+
+### 5️⃣ Mock AI 的边界与停机
+
+发布公开文章后，Worker 会调用 Mock Embedding 写入真实 Milvus，`/api/v1/ai/ask` 会返回基于检索文章片段的 Mock 答案与来源。Mock AI 不访问外网，也不会替代 MySQL 的公开性和内容版本校验。
+
+> Mock AI 只用于开发、演示和端到端验收。它通过确定性特征哈希生成向量，并摘取已授权的 RAG 上下文生成带引用答案；不能用于评估语义召回或回答质量，不应冒充真实模型。
+
+停止完整 Mock AI 栈但保留 MySQL、Redis 和 Milvus 命名卷：
+
+```bash
+make mock-ai-down
+```
 
 ---
 
@@ -218,8 +244,8 @@ make build            # api, worker, migrate → ./bin
 make frontend-check   # lint + 单元测试 + production build
 make frontend-smoke   # Playwright Chromium 浏览器 Smoke
 make check            # 以上全部
-make verify           # check + race detector + Compose 校验
-make verify-integration # 临时 MySQL/Redis：migration、认证、限流、双 Worker SKIP LOCKED
+make verify           # check + race detector + 基础/Mock AI Compose 校验
+make verify-integration # 临时 MySQL/Redis/Milvus：认证、限流、任务队列、索引和 RAG
 ```
 
 🧪 **开发端口覆盖：**
@@ -245,6 +271,10 @@ AI_ENABLED=true             # 总开关：未设置细分开关时同时启用�
 两种模式均需配置：`AI_EMBEDDING_BASE_URL`、`AI_EMBEDDING_API_KEY`、`AI_EMBEDDING_MODEL`、`AI_EMBEDDING_DIMENSIONS`、`MILVUS_ADDR`、`MILVUS_COLLECTION_NAME`。
 
 RAG 额外需要：`AI_CHAT_BASE_URL`、`AI_CHAT_API_KEY`、`AI_CHAT_MODEL`。
+
+若暂时没有真实 Provider，不要修改上述模板变量；直接使用 `deploy/compose.mock-ai.yaml` 对应的 `make mock-ai-up`。覆盖文件会为 API 和 Worker 注入隔离的 Mock 配置，而基础 Compose 仍保持默认关闭 AI。
+
+该覆盖还会写入独立的 `blog_chunks_mock_v1` collection，因此 64 维 Mock 向量不会与真实 Provider 的集合混用，两者切换无需清理数据。
 
 ---
 
