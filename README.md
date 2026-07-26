@@ -260,6 +260,7 @@ RAG additionally needs: `AI_CHAT_BASE_URL`, `AI_CHAT_API_KEY`, `AI_CHAT_MODEL`.
 - Nginx and app body-size limits should be adjusted together; proxy default is 2 MiB.
 - MySQL is the shared source of truth for domain data and jobs; Redis carries no durable tasks.
 - Embedding/Chat API keys live only in environment variables; they never enter logs, job payloads, DB rows, or the frontend.
+- SQL is logged with bind placeholders, so emails, password hashes, tokens, and article bodies stay out of application logs at every log level.
 - RAG only retrieves from published public articles; MySQL re-verifies every candidate before answering.
 - The Chat system prompt marks article content as untrusted data — not instructions.
 

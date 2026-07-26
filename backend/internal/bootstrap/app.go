@@ -124,24 +124,25 @@ func (c *Container) registerModules() error {
 	commentLimit := ratelimit.MiddlewareWithMetrics(c.Redis, c.Keys, "comment:write", c.Cfg.RateLimit.CommentPerMinute, ratelimit.ByUser, c.engine.Metrics())
 	commentsModule.Register(router, authMW, commentLimit)
 
-	if c.Cfg.AI.IndexingEnabled || c.Cfg.AI.RAGEnabled {
-		aiRepo := aimod.NewRepository(c.DB, c.Cfg.Jobs.MaxAttempts)
-		var rag *aimod.RAGService
-		if c.Cfg.AI.RAGEnabled {
-			embedder, err := openaicompat.NewWithMetrics(c.Cfg.AI.Embedding.BaseURL, c.Cfg.AI.Embedding.APIKey, c.Cfg.AI.Embedding.Timeout, c.Cfg.AI.Embedding.MaxRetries, c.engine.Metrics())
-			if err != nil {
-				return err
-			}
-			chat, err := openaicompat.NewWithMetrics(c.Cfg.AI.Chat.BaseURL, c.Cfg.AI.Chat.APIKey, c.Cfg.AI.Chat.Timeout, c.Cfg.AI.Chat.MaxRetries, c.engine.Metrics())
-			if err != nil {
-				return err
-			}
-			vectors := aimod.NewMilvusStoreWithMetrics(c.Cfg.Milvus, c.Cfg.AI.Embedding.Dimensions, c.engine.Metrics())
-			rag = aimod.NewRAGService(c.DB, embedder, chat, vectors, c.Cfg.AI)
+	// The AI module is always mounted so a deployment with AI switched off keeps
+	// answering /api/v1/ai/* with the stable ai_not_enabled contract instead of
+	// the router's generic 404.
+	aiRepo := aimod.NewRepository(c.DB, c.Cfg.Jobs.MaxAttempts)
+	var rag *aimod.RAGService
+	if c.Cfg.AI.RAGEnabled {
+		embedder, err := openaicompat.NewWithMetrics(c.Cfg.AI.Embedding.BaseURL, c.Cfg.AI.Embedding.APIKey, c.Cfg.AI.Embedding.Timeout, c.Cfg.AI.Embedding.MaxRetries, c.engine.Metrics())
+		if err != nil {
+			return err
 		}
-		aiLimit := ratelimit.StrictMiddlewareWithMetrics(c.Redis, c.Keys, "ai:ask", c.Cfg.RateLimit.AIPerMinute, ratelimit.ByIP, c.engine.Metrics())
-		aimod.NewModule(aiRepo, rag).Register(router, adminMW, aiLimit)
+		chat, err := openaicompat.NewWithMetrics(c.Cfg.AI.Chat.BaseURL, c.Cfg.AI.Chat.APIKey, c.Cfg.AI.Chat.Timeout, c.Cfg.AI.Chat.MaxRetries, c.engine.Metrics())
+		if err != nil {
+			return err
+		}
+		vectors := aimod.NewMilvusStoreWithMetrics(c.Cfg.Milvus, c.Cfg.AI.Embedding.Dimensions, c.engine.Metrics())
+		rag = aimod.NewRAGService(c.DB, embedder, chat, vectors, c.Cfg.AI)
 	}
+	aiLimit := ratelimit.StrictMiddlewareWithMetrics(c.Redis, c.Keys, "ai:ask", c.Cfg.RateLimit.AIPerMinute, ratelimit.ByIP, c.engine.Metrics())
+	aimod.NewModule(aiRepo, rag, c.Cfg.AI.IndexingEnabled).Register(router, adminMW, aiLimit)
 
 	return nil
 }
