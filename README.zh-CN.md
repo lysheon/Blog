@@ -216,7 +216,8 @@ make test             # go test ./...
 make vet              # go vet
 make build            # api, worker, migrate → ./bin
 make frontend-check   # lint + 单元测试 + production build
-make frontend-smoke   # Playwright Chromium 浏览器 Smoke
+make frontend-smoke   # Playwright Chromium 浏览器 Smoke（Mock API）
+make e2e-real-api     # 对真实 API/Worker/MySQL/Redis 的浏览器端到端
 make check            # 以上全部
 make verify           # check + race detector + Compose 校验
 make verify-integration # 临时 MySQL/Redis：migration、认证、限流、双 Worker SKIP LOCKED
