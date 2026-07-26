@@ -246,6 +246,8 @@ Both modes need: `AI_EMBEDDING_BASE_URL`, `AI_EMBEDDING_API_KEY`, `AI_EMBEDDING_
 
 RAG additionally needs: `AI_CHAT_BASE_URL`, `AI_CHAT_API_KEY`, `AI_CHAT_MODEL`.
 
+Keep `AI_EMBEDDING_BATCH_SIZE` within your provider's per-request input limit, or long posts fail indexing with a non-retryable 400 — DashScope (Qwen), for example, accepts at most 10 inputs per embeddings call.
+
 ---
 
 <a id="security"></a>

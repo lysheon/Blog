@@ -246,6 +246,8 @@ AI_ENABLED=true             # 总开关：未设置细分开关时同时启用�
 
 RAG 额外需要：`AI_CHAT_BASE_URL`、`AI_CHAT_API_KEY`、`AI_CHAT_MODEL`。
 
+`AI_EMBEDDING_BATCH_SIZE` 必须不超过 Provider 单次请求的输入条数上限，否则长文章会以不可重试的 400 索引失败——例如 DashScope（Qwen）每次 Embedding 调用最多接受 10 条输入。
+
 ---
 
 <a id="security"></a>
