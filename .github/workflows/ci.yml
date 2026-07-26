@@ -70,6 +70,52 @@ jobs:
           cache-dependency-path: backend/go.sum
       - run: make test-integration-basic INTEGRATION_REDIS_PASSWORD=
 
+  real-api-e2e:
+    name: Real API browser E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:8.4.6
+        env:
+          MYSQL_DATABASE: blog_integration
+          MYSQL_USER: blog_test
+          MYSQL_PASSWORD: integration-only-password
+          MYSQL_ROOT_PASSWORD: integration-only-root-password
+        ports:
+          - 33306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -ublog_test -pintegration-only-password"
+          --health-interval=2s
+          --health-timeout=3s
+          --health-retries=30
+      redis:
+        image: redis:7.4.5-alpine3.21
+        ports:
+          - 36379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=2s
+          --health-timeout=3s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci --prefix frontend
+      - run: npx --prefix frontend playwright install --with-deps chromium
+      - run: scripts/testing/run-real-api-e2e.sh
+        env:
+          E2E_SKIP_DEPS: "1"
+          E2E_REDIS_PASSWORD: ""
+
   milvus-ai-integration:
     name: Milvus and AI integration
     runs-on: ubuntu-latest

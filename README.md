@@ -216,7 +216,8 @@ make test             # go test ./...
 make vet              # go vet
 make build            # api, worker, migrate → ./bin
 make frontend-check   # lint + unit test + production build
-make frontend-smoke   # Playwright Chromium browser smoke
+make frontend-smoke   # Playwright Chromium browser smoke (mocked API)
+make e2e-real-api     # browser E2E against a live API/Worker/MySQL/Redis
 make check            # all of the above
 make verify           # check + race detector + Compose validation
 make verify-integration # ephemeral MySQL/Redis: migrations, auth, limits, dual-worker SKIP LOCKED

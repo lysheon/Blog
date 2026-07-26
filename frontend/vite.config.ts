@@ -12,6 +12,15 @@ export default defineConfig({
       '/health': { target: process.env.VITE_DEV_API_TARGET || 'http://127.0.0.1:8081', changeOrigin: true },
     },
   },
+  // The preview server backs Playwright. With VITE_DEV_API_TARGET set it relays
+  // /api and /health to a real backend for the real-API E2E; the mocked smoke
+  // intercepts requests inside the browser, so the relay never sees them.
+  preview: {
+    proxy: {
+      '/api': { target: process.env.VITE_DEV_API_TARGET || 'http://127.0.0.1:8081', changeOrigin: true },
+      '/health': { target: process.env.VITE_DEV_API_TARGET || 'http://127.0.0.1:8081', changeOrigin: true },
+    },
+  },
   test: {
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     environment: 'jsdom',
