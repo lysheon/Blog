@@ -96,6 +96,8 @@ node_modules/
 .yarn/
 .gocache/
 .gomodcache/
+__pycache__/
+*.py[cod]
 
 # Logs and process/runtime files
 *.log

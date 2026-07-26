@@ -104,7 +104,15 @@ cp .env.example .env
 
 At minimum replace `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`, `REDIS_PASSWORD` and `JWT_SECRET` (≥ 32 bytes). Keep `MYSQL_DSN` in sync with the MySQL init values — it's a `go-sql-driver/mysql` DSN, not a `mysql://` URL.
 
-### 3️⃣ Launch (recommended now: local Mock AI)
+### 3️⃣ Pick a stack
+
+| Stack | Command | AI capability | Use it for |
+|---|---|---|---|
+| 🤖 Mock AI (recommended now) | `make mock-ai-up` | Indexing + RAG through an internal Mock Embedding/Chat service | Full AI flow with no provider account |
+| 📰 Base | `make up` | Disabled by default | Blog features only |
+| 🔑 Real provider | `make up` after setting `AI_*` in `.env` | Indexing + RAG through your OpenAI-compatible endpoints | Production-style AI |
+
+Every stack runs the same React SPA, Go API, Worker, MySQL, Redis, Milvus, and Nginx services.
 
 ```bash
 make compose-mock-ai-config  # validate base Compose + Mock AI overlay
@@ -112,15 +120,9 @@ make mock-ai-up              # build and wait for the complete stack
 make mock-ai-ps              # inspect every service
 ```
 
-This starts the React SPA, Go API, Worker, MySQL, Redis, Milvus, Nginx, and an internal-only Mock Embedding/Chat service. A one-shot `mock-ai-smoke` also calls the real `/api/v1/ai/ask`, so the command succeeds only after Embedding, Milvus, and Chat are usable. Base credentials still come from `.env`; Mock AI needs no real provider key.
+A one-shot `mock-ai-smoke` service calls the real `/api/v1/ai/ask`, so `make mock-ai-up` succeeds only after Embedding, Milvus, and Chat are usable. Base credentials still come from `.env`; Mock AI needs no real provider key.
 
-To run only the blog features without indexing or Q&A:
-
-```bash
-make compose-config
-make up
-make ps
-```
+For the blog-only stack, swap in `make compose-config`, `make up`, and `make ps`.
 
 ### 4️⃣ Verify
 
@@ -271,6 +273,8 @@ Both modes need: `AI_EMBEDDING_BASE_URL`, `AI_EMBEDDING_API_KEY`, `AI_EMBEDDING_
 RAG additionally needs: `AI_CHAT_BASE_URL`, `AI_CHAT_API_KEY`, `AI_CHAT_MODEL`.
 
 If a real provider is not available yet, leave those template variables alone and use `make mock-ai-up`, backed by `deploy/compose.mock-ai.yaml`. The overlay injects isolated Mock settings into API and Worker while the base Compose stack keeps AI disabled by default.
+
+The overlay also writes to its own `blog_chunks_mock_v1` collection, so 64-dimension Mock vectors never mix with a real provider's collection. Switching between the two needs no cleanup.
 
 ---
 

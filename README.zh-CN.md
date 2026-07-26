@@ -104,7 +104,15 @@ cp .env.example .env
 
 至少替换 `MYSQL_PASSWORD`、`MYSQL_ROOT_PASSWORD`、`REDIS_PASSWORD` 和 `JWT_SECRET`（至少 32 字节）。确保 `MYSQL_DSN` 与 MySQL 初始化值一致——它是 `go-sql-driver/mysql` DSN，不是 `mysql://` URL。
 
-### 3️⃣ 启动（当前推荐：本地 Mock AI）
+### 3️⃣ 选择部署栈
+
+| 部署栈 | 命令 | AI 能力 | 适用场景 |
+|---|---|---|---|
+| 🤖 Mock AI（当前推荐） | `make mock-ai-up` | 通过内部 Mock Embedding/Chat 启用索引与 RAG | 无 Provider 账号也能跑通完整 AI 流程 |
+| 📰 基础 | `make up` | 默认关闭 | 只使用博客功能 |
+| 🔑 真实 Provider | 配置 `.env` 的 `AI_*` 后 `make up` | 通过你的 OpenAI-compatible 接口启用索引与 RAG | 接近生产的 AI 部署 |
+
+三种方式都会启动同一套 React SPA、Go API、Worker、MySQL、Redis、Milvus 和 Nginx 服务。
 
 ```bash
 make compose-mock-ai-config  # 校验基础 Compose + Mock AI 覆盖
@@ -112,15 +120,9 @@ make mock-ai-up              # 构建并等待完整栈健康
 make mock-ai-ps              # 查看所有服务状态
 ```
 
-该命令会启动 React SPA、Go API、Worker、MySQL、Redis、Milvus、Nginx，以及仅在内部网络可见的 Mock Embedding/Chat 服务；一次性 `mock-ai-smoke` 还会调用真实 `/api/v1/ai/ask`，确保 Embedding、Milvus 和 Chat 链路可用后命令才成功。基础凭据仍从 `.env` 读取；Mock AI 不需要真实 Provider key。
+一次性 `mock-ai-smoke` 服务会调用真实 `/api/v1/ai/ask`，因此只有 Embedding、Milvus 和 Chat 链路可用后 `make mock-ai-up` 才会成功。基础凭据仍从 `.env` 读取；Mock AI 不需要真实 Provider key。
 
-如果只需要博客功能、不启用索引与问答：
-
-```bash
-make compose-config
-make up
-make ps
-```
+只需要博客功能时，改用 `make compose-config`、`make up` 和 `make ps`。
 
 ### 4️⃣ 验证
 
@@ -271,6 +273,8 @@ AI_ENABLED=true             # 总开关：未设置细分开关时同时启用�
 RAG 额外需要：`AI_CHAT_BASE_URL`、`AI_CHAT_API_KEY`、`AI_CHAT_MODEL`。
 
 若暂时没有真实 Provider，不要修改上述模板变量；直接使用 `deploy/compose.mock-ai.yaml` 对应的 `make mock-ai-up`。覆盖文件会为 API 和 Worker 注入隔离的 Mock 配置，而基础 Compose 仍保持默认关闭 AI。
+
+该覆盖还会写入独立的 `blog_chunks_mock_v1` collection，因此 64 维 Mock 向量不会与真实 Provider 的集合混用，两者切换无需清理数据。
 
 ---
 
