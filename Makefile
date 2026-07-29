@@ -19,7 +19,7 @@ GO ?= go
 DOCKER_COMPOSE ?= docker compose
 COMPOSE = $(DOCKER_COMPOSE) --env-file "$(ENV_FILE)" -f "$(COMPOSE_FILE)"
 
-.PHONY: help fmt fmt-check privacy-check test test-race test-integration test-integration-basic vet build frontend-check frontend-smoke e2e-real-api check verify verify-integration verify-integration-basic migrate-list compose-config compose-secrets-config compose-build backup-mysql restore-mysql verify-backup up dev-up down logs ps
+.PHONY: help fmt fmt-check privacy-check test test-race test-integration test-integration-basic vet build frontend-check frontend-smoke check verify verify-integration verify-integration-basic migrate-list compose-config compose-secrets-config compose-build backup-mysql restore-mysql verify-backup up dev-up down logs ps
 
 help: ## 显示可用命令
 	@printf '%s\n' \
@@ -34,7 +34,6 @@ help: ## 显示可用命令
 	  '  make check            Check formatting, vet, tests, and builds' \
 	  '  make verify           Add race tests and Compose validation' \
 	  '  make verify-integration  Run ephemeral MySQL/Redis/Milvus integration tests' \
-	  '  make e2e-real-api     Browser E2E against a live API/Worker/MySQL/Redis' \
 	  '  make migrate-list     List embedded SQL migration versions' \
 	  '  make compose-config   Validate Compose without printing secrets' \
 	  '  make compose-build    Build Compose application images' \
@@ -79,9 +78,6 @@ frontend-check: ## 检查 Frontend lint、test 和 production build
 
 frontend-smoke: ## 运行 Playwright 浏览器 smoke
 	@cd "$(FRONTEND_DIR)" && npm run build && npm run test:e2e
-
-e2e-real-api: ## 对真实 API/Worker/MySQL/Redis 运行浏览器端到端测试
-	@"$(ROOT_DIR)/scripts/testing/run-real-api-e2e.sh"
 
 check: privacy-check fmt-check vet test build frontend-check ## 执行本地隐私与质量检查
 

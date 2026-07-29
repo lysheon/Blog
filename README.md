@@ -217,8 +217,7 @@ make test             # go test ./...
 make vet              # go vet
 make build            # api, worker, migrate → ./bin
 make frontend-check   # lint + unit test + production build
-make frontend-smoke   # Playwright Chromium browser smoke (mocked API)
-make e2e-real-api     # browser E2E against a live API/Worker/MySQL/Redis
+make frontend-smoke   # Playwright Chromium browser smoke
 make check            # all of the above
 make verify           # check + race detector + Compose validation
 make verify-integration # ephemeral MySQL/Redis: migrations, auth, limits, dual-worker SKIP LOCKED
@@ -247,8 +246,6 @@ AI_ENABLED=true             # umbrella: enables both if individual flags absent
 Both modes need: `AI_EMBEDDING_BASE_URL`, `AI_EMBEDDING_API_KEY`, `AI_EMBEDDING_MODEL`, `AI_EMBEDDING_DIMENSIONS`, `MILVUS_ADDR`, `MILVUS_COLLECTION_NAME`.
 
 RAG additionally needs: `AI_CHAT_BASE_URL`, `AI_CHAT_API_KEY`, `AI_CHAT_MODEL`.
-
-Keep `AI_EMBEDDING_BATCH_SIZE` within your provider's per-request input limit, or long posts fail indexing with a non-retryable 400 — DashScope (Qwen), for example, accepts at most 10 inputs per embeddings call.
 
 ---
 

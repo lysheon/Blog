@@ -123,3 +123,4 @@ Thumbs.db
 *.tmp
 *.temp
 /tmp/
+.playwright-mcp/
