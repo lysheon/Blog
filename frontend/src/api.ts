@@ -106,6 +106,8 @@ export const api = {
   me: () => rawRequest<{ user: User; profile: UserProfile | null }>('/auth/me'),
 
   listPosts: (page = 1) => rawRequest<PagedPosts>(`/posts?page=${page}&page_size=9`),
+  listMyPosts: (page = 1, status = '') =>
+    rawRequest<PagedPosts>(`/me/posts?page=${page}&page_size=20${status ? `&status=${encodeURIComponent(status)}` : ''}`),
   getPost: (slug: string) => rawRequest<{ post: Post }>(`/posts/${encodeURIComponent(slug)}`),
   createPost: (input: PostInput) => rawRequest<{ post: Post }>('/posts', { method: 'POST', body: JSON.stringify(input) }),
   updatePost: (slug: string, input: Partial<PostInput>) =>

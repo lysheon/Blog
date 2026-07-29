@@ -65,18 +65,11 @@ func TestHTTPBlogAndModerationFlow(t *testing.T) {
 	if err := container.Redis.FlushDB(ctx).Err(); err != nil {
 		t.Fatalf("flush Redis: %v", err)
 	}
-	// Every table this flow writes to must be cleared, otherwise a second run
-	// against the same database fails on the unique category name.
 	for _, statement := range []string{
 		"SET FOREIGN_KEY_CHECKS=0",
 		"DELETE FROM background_jobs",
 		"DELETE FROM comments",
-		"DELETE FROM post_categories",
-		"DELETE FROM post_tags",
 		"DELETE FROM posts",
-		"DELETE FROM categories",
-		"DELETE FROM tags",
-		"DELETE FROM refresh_tokens",
 		"DELETE FROM user_profiles",
 		"DELETE FROM users",
 		"SET FOREIGN_KEY_CHECKS=1",

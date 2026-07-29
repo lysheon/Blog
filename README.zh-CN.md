@@ -143,6 +143,7 @@ GET    /posts/:slug            📖 公开或作者/管理员
 POST   /posts                  ✏️  登录用户
 PUT    /posts/:slug             🖊️  作者或管理员
 DELETE /posts/:slug             🗑️  作者或管理员
+GET    /me/posts               🗂️  本人全部文章（含草稿）
 
 🏷️  分类与标签 ───────────────────────────────────
 GET    /categories             📂 公开
@@ -246,8 +247,6 @@ AI_ENABLED=true             # 总开关：未设置细分开关时同时启用�
 两种模式均需配置：`AI_EMBEDDING_BASE_URL`、`AI_EMBEDDING_API_KEY`、`AI_EMBEDDING_MODEL`、`AI_EMBEDDING_DIMENSIONS`、`MILVUS_ADDR`、`MILVUS_COLLECTION_NAME`。
 
 RAG 额外需要：`AI_CHAT_BASE_URL`、`AI_CHAT_API_KEY`、`AI_CHAT_MODEL`。
-
-`AI_EMBEDDING_BATCH_SIZE` 必须不超过 Provider 单次请求的输入条数上限，否则长文章会以不可重试的 400 索引失败——例如 DashScope（Qwen）每次 Embedding 调用最多接受 10 条输入。
 
 ---
 

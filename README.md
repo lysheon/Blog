@@ -143,6 +143,7 @@ GET    /posts/:slug            📖 public or owner/admin
 POST   /posts                  ✏️  authenticated
 PUT    /posts/:slug             🖊️  author or admin
 DELETE /posts/:slug             🗑️  author or admin
+GET    /me/posts               🗂️  own posts incl. drafts (workspace)
 
 🏷️  Taxonomy ─────────────────────────────────────
 GET    /categories             📂 public
@@ -246,8 +247,6 @@ AI_ENABLED=true             # umbrella: enables both if individual flags absent
 Both modes need: `AI_EMBEDDING_BASE_URL`, `AI_EMBEDDING_API_KEY`, `AI_EMBEDDING_MODEL`, `AI_EMBEDDING_DIMENSIONS`, `MILVUS_ADDR`, `MILVUS_COLLECTION_NAME`.
 
 RAG additionally needs: `AI_CHAT_BASE_URL`, `AI_CHAT_API_KEY`, `AI_CHAT_MODEL`.
-
-Keep `AI_EMBEDDING_BATCH_SIZE` within your provider's per-request input limit, or long posts fail indexing with a non-retryable 400 — DashScope (Qwen), for example, accepts at most 10 inputs per embeddings call.
 
 ---
 
