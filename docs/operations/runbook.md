@@ -1,10 +1,10 @@
-# Stage 5 生产运维手册
+# 生产运维手册
 
-本文是 Blog Stage 5 的最小生产操作手册。所有生产操作都必须记录操作者、时间、目标环境、变更前后版本和验证结果。
+本文是 Blog 当前生产操作手册。所有生产操作都必须记录操作者、时间、目标环境、变更前后版本和验证结果。首次部署新环境请先阅读[首次部署指南](../deployment/first-deployment.md)。
 
 ## 1. 发布前检查
 
-1. 确认 PR 的 `Quality` 和 `MySQL integration` 均为绿色。
+1. 确认 PR 的 `Quality`、`MySQL integration`、`Real API browser E2E` 和 `Milvus and AI integration` 均为绿色。
 2. 在 staging 使用与生产相同的镜像 tag、migration 和 secret 注入方式。
 3. 执行：
 
@@ -245,4 +245,4 @@ MySQL readiness failure       critical
 
 指标 label 禁止包含问题、回答、文章正文、Cookie、JWT、API key 或任意用户输入路径。
 
-Stage 5 的目标不是隐藏故障，而是让故障能被及时发现、隔离、恢复并留下可审计记录。
+当前生产运维目标不是隐藏故障，而是让故障能被及时发现、隔离、恢复并留下可审计记录。
