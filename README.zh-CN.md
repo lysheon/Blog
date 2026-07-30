@@ -8,13 +8,13 @@
 
 🌐 **语言 / Language：** [🇺🇸 English](README.md) · **🇨🇳 简体中文**
 
-[✨ 功能](#features) · [🚀 快速开始](#quick-start) · [🔌 API](#api) · [🛠️ 开发](#development) · [🔒 安全](#security) · [🗺️ 路线图](#roadmap)
+[✨ 功能](#features) · [🚀 快速开始](#quick-start) · [📚 文档中心](docs/README.md) · [🚢 首次部署](docs/deployment/first-deployment.md) · [🔌 API](#api) · [🛠️ 开发](#development) · [🔒 安全](#security)
 
 </div>
 
 > 🎉 **阶段 5.1 已完成！** 项目现已具备真实 MySQL/Redis/Milvus 集成验收、浏览器 Smoke、运行时指标、Secret 文件部署、隐私检查，以及经过验证的备份恢复自动化。
 
-一次 `docker compose up` 即可交付 React SPA、Go API、后台 Worker、MySQL、Redis、Milvus 和 Nginx 代理。
+生产 Secret 部署、TLS 边界、首个管理员初始化和验收清单请遵循[首次部署指南](docs/deployment/first-deployment.md)；上线后的操作见[生产运维手册](docs/operations/runbook.md)。
 
 ---
 
@@ -74,12 +74,16 @@ Blog/
 │   ├── compose.secrets.yaml      # 生产 Secret 文件覆盖
 │   └── proxy/nginx.conf
 ├── docs/
-│   ├── architecture/{stage-0,stage-1,stage-2,stage-3,stage-4,stage-5,stage-5-1}.md
-│   ├── operations-runbook.md
+│   ├── README.md                    # 文档入口
+│   ├── deployment/                  # 首次部署
+│   ├── operations/                  # 发布、回滚与恢复
+│   ├── architecture/                # 当前架构与阶段历史
+│   ├── repository-structure.md      # 源码、CI 与远端分支结构
 │   └── adr/0001-modular-monolith.md
 ├── scripts/
-│   ├── operations/               # 备份恢复自动化
-│   └── security/                 # 仓库隐私检查
+│   ├── operations/                  # 备份恢复自动化
+│   ├── security/                    # 仓库隐私检查
+│   └── testing/                     # 真实 API 浏览器验收
 ├── .env.example                  # 只能保存无害占位值
 └── Makefile
 ```
@@ -255,7 +259,7 @@ RAG 额外需要：`AI_CHAT_BASE_URL`、`AI_CHAT_API_KEY`、`AI_CHAT_MODEL`。
 ## 🔒 安全与部署注意
 
 - `.env` 已忽略；`.env.example` 只能保存无害占位值。
-- 生产可使用 `deploy/compose.secrets.yaml`；后端支持敏感 `*_FILE` 变量，在启动时读取挂载 Secret。
+- 生产应使用 `deploy/compose.secrets.yaml`；后端支持敏感 `*_FILE` 变量，在启动时读取挂载 Secret。详见[首次部署指南](docs/deployment/first-deployment.md)。
 - 生产必须 `AUTH_COOKIE_SECURE=true`；应在可信入口终止 TLS。
 - 启用 credentials 时 CORS origin 不能是 `*`。
 - 正确设置 `HTTP_TRUSTED_PROXIES`，否则按 IP 限流可能使用错误地址。

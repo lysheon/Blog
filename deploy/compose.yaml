@@ -1,7 +1,7 @@
 name: blog
 
 x-backend-service: &backend-service
-  image: blog-backend:${BLOG_BACKEND_IMAGE_TAG:-stage1}
+  image: blog-backend:${BLOG_BACKEND_IMAGE_TAG:-local}
   build:
     context: ../backend
     dockerfile: Dockerfile
@@ -122,7 +122,7 @@ services:
       - no-new-privileges:true
 
   frontend:
-    image: blog-frontend:${BLOG_FRONTEND_IMAGE_TAG:-stage2}
+    image: blog-frontend:${BLOG_FRONTEND_IMAGE_TAG:-local}
     build:
       context: ../frontend
       dockerfile: Dockerfile

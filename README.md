@@ -8,13 +8,13 @@
 
 🌐 **Language / 语言：** **🇺🇸 English** · [🇨🇳 简体中文](README.zh-CN.md)
 
-[✨ Features](#features) · [🚀 Quick start](#quick-start) · [🔌 API](#api) · [🛠️ Development](#development) · [🔒 Security](#security) · [🗺️ Roadmap](#roadmap)
+[✨ Features](#features) · [🚀 Quick start](#quick-start) · [📚 Documentation](docs/README.md) · [🚢 Deployment](docs/deployment/first-deployment.md) · [🔌 API](#api) · [🛠️ Development](#development) · [🔒 Security](#security)
 
 </div>
 
 > 🎉 **Stage 5.1 complete!** The platform now includes real MySQL/Redis/Milvus integration acceptance, browser smoke tests, runtime metrics, secret-file deployment, privacy checks, and verified backup/restore automation.
 
-One `docker compose up` delivers the React SPA, Go API, background Worker, MySQL, Redis, Milvus, and Nginx proxy.
+For a production-style Secret deployment, TLS boundary, first administrator bootstrap and acceptance checklist, follow the [first deployment guide](docs/deployment/first-deployment.md). Day-two procedures live in the [production operations runbook](docs/operations/runbook.md).
 
 ---
 
@@ -74,12 +74,16 @@ Blog/
 │   ├── compose.secrets.yaml      # Production secret-file overlay
 │   └── proxy/nginx.conf
 ├── docs/
-│   ├── architecture/{stage-0,stage-1,stage-2,stage-3,stage-4,stage-5,stage-5-1}.md
-│   ├── operations-runbook.md
+│   ├── README.md                    # Documentation entry point
+│   ├── deployment/                  # First deployment
+│   ├── operations/                  # Release, rollback and recovery
+│   ├── architecture/                # Current architecture + stage history
+│   ├── repository-structure.md      # Source, CI and remote branch map
 │   └── adr/0001-modular-monolith.md
 ├── scripts/
-│   ├── operations/               # Backup and recovery automation
-│   └── security/                 # Repository privacy checks
+│   ├── operations/                  # Backup and recovery automation
+│   ├── security/                    # Repository privacy checks
+│   └── testing/                     # Live API browser acceptance
 ├── .env.example                  # Harmless placeholders only
 └── Makefile
 ```
@@ -255,7 +259,7 @@ RAG additionally needs: `AI_CHAT_BASE_URL`, `AI_CHAT_API_KEY`, `AI_CHAT_MODEL`.
 ## 🔒 Security & deploy notes
 
 - `.env` is gitignored; `.env.example` holds harmless placeholders only.
-- Production can use `deploy/compose.secrets.yaml`; the backend accepts sensitive `*_FILE` variables and reads mounted secrets at startup.
+- Production should use `deploy/compose.secrets.yaml`; the backend accepts sensitive `*_FILE` variables and reads mounted secrets at startup. See the [first deployment guide](docs/deployment/first-deployment.md).
 - Production requires `AUTH_COOKIE_SECURE=true`; terminate TLS at a trusted ingress.
 - CORS origin must not be `*` when credentials are enabled.
 - Set `HTTP_TRUSTED_PROXIES` correctly or IP-based rate limits will see the wrong address.

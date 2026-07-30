@@ -8,8 +8,10 @@ scripts/
 │   ├── backup-mysql.sh
 │   ├── restore-mysql.sh
 │   └── verify-backup.sh
-└── security/                # Repository privacy and credential checks
-    └── check-privacy.sh
+├── security/                # Repository privacy and credential checks
+│   └── check-privacy.sh
+└── testing/                 # Live API/Worker browser acceptance
+    └── run-real-api-e2e.sh
 ```
 
 ## Privacy rules
@@ -29,4 +31,4 @@ make restore-mysql
 make verify-backup
 ```
 
-Required variables and destructive-operation confirmation are documented in `docs/operations-runbook.md`.
+Required variables and destructive-operation confirmation are documented in [`docs/operations/runbook.md`](../docs/operations/runbook.md).
