@@ -42,10 +42,10 @@ describe('MyPostsPage', () => {
 
     await waitFor(() => expect(screen.getByText('Public story')).toBeInTheDocument())
     expect(screen.getByText('Secret draft')).toBeInTheDocument()
-    const editLinks = screen.getAllByRole('link', { name: 'Edit' })
+    const editLinks = screen.getAllByRole('link', { name: '编辑' })
     expect(editLinks[0]).toHaveAttribute('href', '/write?edit=public-story')
-    expect(screen.getAllByRole('link', { name: 'View' })).toHaveLength(1)
-    expect(screen.getByRole('link', { name: 'View' })).toHaveAttribute('href', '/posts/public-story')
+    expect(screen.getAllByRole('link', { name: '查看' })).toHaveLength(1)
+    expect(screen.getByRole('link', { name: '查看' })).toHaveAttribute('href', '/posts/public-story')
   })
 
   it('reloads with the chosen status filter from page one', async () => {
@@ -54,7 +54,7 @@ describe('MyPostsPage', () => {
     renderPage()
     await waitFor(() => expect(listMine).toHaveBeenCalledWith(1, ''))
 
-    await userEvent.click(screen.getByRole('button', { name: 'Drafts' }))
+    await userEvent.click(screen.getByRole('button', { name: '草稿' }))
     await waitFor(() => expect(listMine).toHaveBeenCalledWith(1, 'draft'))
   })
 
@@ -63,8 +63,8 @@ describe('MyPostsPage', () => {
 
     renderPage()
 
-    await waitFor(() => expect(screen.getByText('Nothing here yet')).toBeInTheDocument())
-    expect(screen.getByRole('link', { name: 'Start one now.' })).toHaveAttribute('href', '/write')
+    await waitFor(() => expect(screen.getByText('还没有内容')).toBeInTheDocument())
+    expect(screen.getByRole('link', { name: '现在开始写一篇。' })).toHaveAttribute('href', '/write')
   })
 
   it('surfaces the API error with a retry', async () => {
@@ -76,6 +76,6 @@ describe('MyPostsPage', () => {
     renderPage()
 
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('something broke'))
-    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '重试' })).toBeInTheDocument()
   })
 })

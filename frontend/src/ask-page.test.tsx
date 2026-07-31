@@ -10,8 +10,8 @@ function renderAskPage() {
 }
 
 async function ask(question: string) {
-  await userEvent.type(screen.getByLabelText('Your question'), question)
-  await userEvent.click(screen.getByRole('button', { name: 'Ask' }))
+  await userEvent.type(screen.getByLabelText('你的问题'), question)
+  await userEvent.click(screen.getByRole('button', { name: '提问' }))
 }
 
 describe('AskPage', () => {
@@ -32,9 +32,9 @@ describe('AskPage', () => {
     renderAskPage()
     await ask('What do these stories cover?')
 
-    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('The article assistant is turned off'))
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('文章助手未启用'))
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-    expect(screen.getByLabelText('Your question')).toBeDisabled()
+    expect(screen.getByLabelText('你的问题')).toBeDisabled()
   })
 
   it('reports genuine upstream failures as errors', async () => {
@@ -49,7 +49,7 @@ describe('AskPage', () => {
 
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('temporarily unavailable'))
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
-    expect(screen.getByLabelText('Your question')).toBeEnabled()
+    expect(screen.getByLabelText('你的问题')).toBeEnabled()
   })
 
   it('renders a grounded answer with its linked sources', async () => {

@@ -4,11 +4,14 @@ import { api, ApiError } from '../api'
 import { EmptyState, ErrorState } from '../components'
 import type { PagedPosts, Post } from '../types'
 
+const statusLabels: Record<string, string> = { draft: '草稿', published: '已发布', archived: '已归档' }
+const visibilityLabels: Record<string, string> = { public: '公开', private: '私密' }
+
 const filters = [
-  { value: '', label: 'All' },
-  { value: 'draft', label: 'Drafts' },
-  { value: 'published', label: 'Published' },
-  { value: 'archived', label: 'Archived' },
+  { value: '', label: '全部' },
+  { value: 'draft', label: '草稿' },
+  { value: 'published', label: '已发布' },
+  { value: 'archived', label: '已归档' },
 ] as const
 
 function publicPath(post: Post) {
@@ -29,7 +32,7 @@ export function MyPostsPage() {
     api.listMyPosts(page, status)
       .then((data) => { if (!cancelled) setResult(data) })
       .catch((caught) => {
-        if (!cancelled) setError(caught instanceof ApiError ? caught.message : 'Could not load your stories.')
+        if (!cancelled) setError(caught instanceof ApiError ? caught.message : '无法加载你的文章。')
       })
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
@@ -43,11 +46,11 @@ export function MyPostsPage() {
   return <main className="page-shell">
     <section className="section-block">
       <div className="section-heading">
-        <div><span className="eyebrow">Your studio</span><h2>My stories</h2></div>
-        {result && <span className="muted">{result.pagination.total} total</span>}
+        <div><span className="eyebrow">你的创作台</span><h2>我的文章</h2></div>
+        {result && <span className="muted">共 {result.pagination.total} 篇</span>}
       </div>
 
-      <div className="ask-actions" role="group" aria-label="Filter by status">
+      <div className="ask-actions" role="group" aria-label="按状态筛选">
         {filters.map((filter) => (
           <button key={filter.value} type="button"
             className={status === filter.value ? 'button compact' : 'button ghost compact'}
@@ -57,10 +60,10 @@ export function MyPostsPage() {
       </div>
 
       {error && <ErrorState message={error} retry={() => applyFilter(status)} />}
-      {!error && loading && !result && <p className="muted">Loading your stories…</p>}
+      {!error && loading && !result && <p className="muted">正在加载你的文章…</p>}
       {!error && result && result.posts.length === 0 && (
-        <EmptyState title="Nothing here yet">
-          Stories you write appear here across every status. <Link to="/write">Start one now.</Link>
+        <EmptyState title="还没有内容">
+          你写的文章会按所有状态显示在这里。<Link to="/write">现在开始写一篇。</Link>
         </EmptyState>
       )}
       {!error && result && result.posts.length > 0 && (
@@ -70,12 +73,12 @@ export function MyPostsPage() {
             return <div className="taxonomy-row" key={post.public_id}>
               <div>
                 <strong>{post.title}</strong>
-                <span>{post.status} · {post.visibility} · edited {new Date(post.updated_at).toLocaleDateString()}</span>
+                <span>{statusLabels[post.status] || post.status} · {visibilityLabels[post.visibility] || post.visibility} · 编辑于 {new Date(post.updated_at).toLocaleDateString('zh-CN')}</span>
                 {post.summary && <p>{post.summary}</p>}
               </div>
               <div>
-                <Link className="text-button" to={`/write?edit=${encodeURIComponent(post.slug)}`}>Edit</Link>
-                {readable && <Link className="text-button" to={readable}>View</Link>}
+                <Link className="text-button" to={`/write?edit=${encodeURIComponent(post.slug)}`}>编辑</Link>
+                {readable && <Link className="text-button" to={readable}>查看</Link>}
               </div>
             </div>
           })}
@@ -83,10 +86,10 @@ export function MyPostsPage() {
       )}
 
       {result && result.pagination.total_pages > 1 && (
-        <nav className="pagination" aria-label="Workspace pages">
-          <button disabled={page <= 1} onClick={() => setPage(page - 1)}>← Newer</button>
+        <nav className="pagination" aria-label="工作区分页">
+          <button disabled={page <= 1} onClick={() => setPage(page - 1)}>← 较新</button>
           <span>{page} / {result.pagination.total_pages}</span>
-          <button disabled={page >= result.pagination.total_pages} onClick={() => setPage(page + 1)}>Older →</button>
+          <button disabled={page >= result.pagination.total_pages} onClick={() => setPage(page + 1)}>较旧 →</button>
         </nav>
       )}
     </section>

@@ -5,8 +5,8 @@ import { EmptyState } from './components'
 
 describe('EmptyState', () => {
   it('renders an accessible empty message', () => {
-    render(<MemoryRouter><EmptyState title="No stories">Publish the first one.</EmptyState></MemoryRouter>)
-    expect(screen.getByText('No stories')).toBeInTheDocument()
-    expect(screen.getByText('Publish the first one.')).toBeInTheDocument()
+    render(<MemoryRouter><EmptyState title="还没有文章">发布第一篇。</EmptyState></MemoryRouter>)
+    expect(screen.getByText('还没有文章')).toBeInTheDocument()
+    expect(screen.getByText('发布第一篇。')).toBeInTheDocument()
   })
 })
