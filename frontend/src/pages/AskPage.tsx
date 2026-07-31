@@ -26,7 +26,7 @@ export function AskPage() {
       if (caught instanceof ApiError && caught.code === 'ai_not_enabled') {
         setUnavailable(true)
       } else {
-        setError(caught instanceof ApiError ? caught.message : 'The article assistant is temporarily unavailable.')
+        setError(caught instanceof ApiError ? caught.message : '文章助手暂时不可用。')
       }
     } finally {
       setLoading(false)
@@ -35,30 +35,30 @@ export function AskPage() {
 
   return <main className="page-shell ask-page">
     <section className="ask-hero">
-      <div className="eyebrow">Article assistant</div>
-      <h1>Ask the published stories.</h1>
-      <p>Answers are grounded in the public articles and include links back to their sources.</p>
+      <div className="eyebrow">文章助手</div>
+      <h1>向已发布文章提问。</h1>
+      <p>回答基于公开文章生成，并附带可溯源链接。</p>
       <form className="ask-form" onSubmit={(event) => void submit(event)}>
-        <label htmlFor="rag-question">Your question</label>
+        <label htmlFor="rag-question">你的问题</label>
         <textarea id="rag-question" value={question} maxLength={2000} rows={5} disabled={unavailable}
           onChange={(event) => setQuestion(event.target.value)}
-          placeholder="What do these articles say about…?" />
-        <div className="ask-actions"><span>{question.length} / 2000</span><button className="button" disabled={loading || unavailable || !question.trim()}>{loading ? 'Searching…' : 'Ask'}</button></div>
+          placeholder="这些文章提到了什么关于…？" />
+        <div className="ask-actions"><span>{question.length} / 2000</span><button className="button" disabled={loading || unavailable || !question.trim()}>{loading ? '检索中…' : '提问'}</button></div>
       </form>
     </section>
 
     {unavailable && <section className="state-card" role="status">
-      <strong>The article assistant is turned off</strong>
-      <p>This deployment runs without AI question answering. Every published story is still fully readable — <Link to="/">browse the journal</Link>.</p>
+      <strong>文章助手未启用</strong>
+      <p>当前部署未启用 AI 问答。所有已发布文章仍可正常阅读——<Link to="/">浏览文章列表</Link>。</p>
     </section>}
-    {error && <section className="error-state" role="alert"><strong>Question failed</strong><p>{error}</p></section>}
+    {error && <section className="error-state" role="alert"><strong>提问失败</strong><p>{error}</p></section>}
     {result && <section className="answer-panel" aria-live="polite">
-      <div className="eyebrow">Grounded answer</div>
+      <div className="eyebrow">基于文章的答案</div>
       <p className="answer-text">{result.answer}</p>
-      <h2>Sources</h2>
-      {result.sources.length === 0 ? <p className="muted">No sufficiently relevant published sources were found.</p> :
+      <h2>来源</h2>
+      {result.sources.length === 0 ? <p className="muted">未找到足够相关的已发布来源。</p> :
         <div className="source-list">{result.sources.map((source) => <Link className="source-card" key={source.post_id} to={`/posts/${source.slug}`}>
-          <div><strong>{source.title}</strong><span>Similarity {Math.round(source.score * 100)}%</span></div>
+          <div><strong>{source.title}</strong><span>相似度 {Math.round(source.score * 100)}%</span></div>
           <p>{source.excerpt}</p>
         </Link>)}</div>}
     </section>}

@@ -19,7 +19,7 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
       else await register(email, username, password)
       const destination = (location.state as { from?: string } | null)?.from || '/'
       navigate(destination, { replace: true })
-    } catch (err) { setError(err instanceof Error ? err.message : 'Authentication failed') }
+    } catch (err) { setError(err instanceof Error ? err.message : '认证失败') }
     finally { setBusy(false) }
   }
 
@@ -27,18 +27,18 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
   return <main className="auth-page">
     <section className="auth-panel">
       <Link className="brand auth-brand" to="/"><span className="brand-mark">B</span><span>Blog<span className="brand-dot">.</span></span></Link>
-      <div className="eyebrow">{loginMode ? 'Welcome back' : 'Create your account'}</div>
-      <h1>{loginMode ? 'Return to your reading.' : 'Start writing your story.'}</h1>
-      <p>{loginMode ? 'Sign in to write, comment, and continue where you left off.' : 'Join a small community built around clear ideas and generous discussion.'}</p>
+      <div className="eyebrow">{loginMode ? '欢迎回来' : '创建你的账户'}</div>
+      <h1>{loginMode ? '回到你的阅读。' : '开始书写你的故事。'}</h1>
+      <p>{loginMode ? '登录后写作、评论，并从上次停下的地方继续。' : '加入一个围绕清晰观点与真诚交流的小社区。'}</p>
       {error && <div className="form-error" role="alert">{error}</div>}
       <form className="form-stack" onSubmit={submit}>
-        <label>Email<input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
-        {!loginMode && <label>Username<input minLength={3} maxLength={32} autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} required /></label>}
-        <label>Password<input type="password" minLength={8} autoComplete={loginMode ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} required /></label>
-        <button className="button full" disabled={busy}>{busy ? 'Please wait…' : loginMode ? 'Sign in' : 'Create account'}</button>
+        <label>邮箱<input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
+        {!loginMode && <label>用户名<input minLength={3} maxLength={32} autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} required /></label>}
+        <label>密码<input type="password" minLength={8} autoComplete={loginMode ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} required /></label>
+        <button className="button full" disabled={busy}>{busy ? '请稍候…' : loginMode ? '登录' : '创建账户'}</button>
       </form>
-      <p className="auth-switch">{loginMode ? 'New here?' : 'Already have an account?'} <Link to={loginMode ? '/register' : '/login'} state={location.state}>{loginMode ? 'Create an account' : 'Sign in'}</Link></p>
+      <p className="auth-switch">{loginMode ? '新用户？' : '已有账户？'} <Link to={loginMode ? '/register' : '/login'} state={location.state}>{loginMode ? '创建账户' : '登录'}</Link></p>
     </section>
-    <aside className="auth-aside"><blockquote>“The role of a writer is not to say what we can all say, but what we are unable to say.”</blockquote><span>— Anaïs Nin</span></aside>
+    <aside className="auth-aside"><blockquote>“作家的职责不是说出我们都能说的话，而是说出我们无法言说之事。”</blockquote><span>— 阿娜伊斯·宁</span></aside>
   </main>
 }

@@ -17,40 +17,40 @@ const title = `Real API flow ${suffix}`
 const commentBody = `A grounded comment ${suffix}`
 
 async function expectSignedIn(page: Page) {
-  await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '退出登录' })).toBeVisible()
 }
 
 test('a reader can register, publish, comment and share the story', async ({ page }) => {
   await page.goto('/register')
-  await page.getByRole('textbox', { name: 'Email' }).fill(email)
-  await page.getByRole('textbox', { name: 'Username' }).fill(username)
-  await page.getByRole('textbox', { name: 'Password' }).fill(password)
-  await page.getByRole('button', { name: 'Create account' }).click()
+  await page.getByRole('textbox', { name: '邮箱' }).fill(email)
+  await page.getByRole('textbox', { name: '用户名' }).fill(username)
+  await page.getByRole('textbox', { name: '密码' }).fill(password)
+  await page.getByRole('button', { name: '创建账户' }).click()
   await expectSignedIn(page)
 
   // The session must survive a full reload through the real refresh cookie.
   await page.reload()
   await expectSignedIn(page)
 
-  await page.getByRole('link', { name: 'Write' }).click()
-  await page.getByRole('textbox', { name: 'Title' }).fill(title)
-  await page.getByRole('textbox', { name: 'Summary' }).fill('Written by the real-API browser flow.')
-  await page.getByRole('textbox', { name: 'Story Markdown' }).fill('# Grounded\n\nThis story exists in real MySQL.')
-  await page.getByRole('combobox', { name: 'Status' }).selectOption('published')
-  await page.getByRole('button', { name: 'Publish story' }).click()
+  await page.getByRole('link', { name: '写作' }).click()
+  await page.getByRole('textbox', { name: '标题' }).fill(title)
+  await page.getByRole('textbox', { name: '摘要' }).fill('Written by the real-API browser flow.')
+  await page.getByRole('textbox', { name: '正文 Markdown' }).fill('# Grounded\n\nThis story exists in real MySQL.')
+  await page.getByRole('combobox', { name: '状态' }).selectOption('published')
+  await page.getByRole('button', { name: '发布文章' }).click()
 
   await expect(page.getByRole('heading', { name: title })).toBeVisible()
   const postURL = page.url()
 
-  await page.getByRole('textbox', { name: /Add to the conversation/ }).fill(commentBody)
-  await page.getByRole('button', { name: 'Post comment' }).click()
-  await expect(page.getByRole('status')).toContainText('awaiting automatic moderation')
+  await page.getByRole('textbox', { name: /参与讨论/ }).fill(commentBody)
+  await page.getByRole('button', { name: '发表评论' }).click()
+  await expect(page.getByRole('status')).toContainText('等待自动审核')
 
   // The Worker approves the comment asynchronously; an anonymous visitor only
   // sees it once moderation completed. Comments load after the page itself, so
   // each retry gives the fetch a short window before reloading.
-  await page.getByRole('button', { name: 'Sign out' }).click()
-  await expect(page.getByRole('link', { name: 'Sign in' })).toBeVisible()
+  await page.getByRole('button', { name: '退出登录' }).click()
+  await expect(page.getByRole('link', { name: '登录' })).toBeVisible()
   await expect(async () => {
     await page.goto(postURL)
     await expect(page.getByText(commentBody)).toBeVisible({ timeout: 3_000 })
@@ -66,10 +66,10 @@ test('the ask page reports that answering is switched off', async ({ page }) => 
   // The harness runs with AI disabled, so the real backend answers
   // ai_not_enabled and the page must explain the state instead of failing.
   await page.goto('/ask')
-  await page.getByRole('textbox', { name: 'Your question' }).fill('Is the assistant available?')
-  await page.getByRole('button', { name: 'Ask' }).click()
+  await page.getByRole('textbox', { name: '你的问题' }).fill('Is the assistant available?')
+  await page.getByRole('button', { name: '提问' }).click()
 
-  await expect(page.getByRole('status')).toContainText('The article assistant is turned off')
+  await expect(page.getByRole('status')).toContainText('文章助手未启用')
   await expect(page.getByRole('alert')).toHaveCount(0)
-  await expect(page.getByRole('textbox', { name: 'Your question' })).toBeDisabled()
+  await expect(page.getByRole('textbox', { name: '你的问题' })).toBeDisabled()
 })

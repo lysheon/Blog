@@ -22,7 +22,7 @@ export class ApiError extends Error {
   readonly requestId?: string
 
   constructor(status: number, failure?: ApiFailure) {
-    super(failure?.error?.message || `Request failed with status ${status}`)
+    super(failure?.error?.message || `请求失败（状态码 ${status}）`)
     this.name = 'ApiError'
     this.status = status
     this.code = failure?.error?.code || 'request_failed'
