@@ -42,7 +42,7 @@ git --version
 ## 3. 获取部署基线
 
 ```bash
-git clone https://github.com/wudiqiegaoleng63/Blog.git
+git clone https://github.com/lysheon/Blog.git
 cd Blog
 git fetch origin --prune --tags
 git switch main
